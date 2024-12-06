@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"  # フロントエンド開発サーバーのポート
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+    command: npm run dev
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"  # Flaskバックエンドのポート
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/usr/src/app
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/taskdb
+
+  db:
+    image: postgres:14
+    ports:
+      - "5432:5432"  # PostgreSQLのポート
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: taskdb
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:  # PostgreSQLのデータ永続化
