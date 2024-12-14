@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
+import { useEffect } from 'react'
+import {getTasks} from '@/pages/api/getTasks'
 
 interface Task {
   id: number
@@ -15,6 +17,12 @@ export default function TaskManager() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [newTask, setNewTask] = useState('')
   const [darkMode, setDarkMode] = useState(false)
+
+  useEffect(() => {
+    getTasks().then(data => {
+      setTasks(data)
+    })
+  }, [])
 
   const addTask = () => {
     if (newTask.trim() !== '') {
@@ -36,6 +44,12 @@ export default function TaskManager() {
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
   }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      addTask();
+    }
+  };
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
