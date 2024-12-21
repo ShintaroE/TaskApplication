@@ -6,6 +6,7 @@ interface Task {
     completed: boolean
 }
 
+//帰ってきたデータが配列型かつ、その中身がTask型であるかどうかを判定する関数
 function isTaskArray(data: any): data is Task[] {
     return Array.isArray(data) && data.every(item => 
       typeof item.id === 'number' &&
@@ -16,14 +17,17 @@ function isTaskArray(data: any): data is Task[] {
 
 export async function getTasks() :Promise<Task[]> {
   try {
-    const response = await axios.get('http://localhost:8000/api/tasks');
+    //REST APIを叩いてデータを取得
+    const response = await axios.get('http://localhost:8000/api/gettasks');
+    //取得したデータをdataに格納
     const data:any = response.data;
+    //型チェック
     if (!isTaskArray(data)) {
         throw new Error('Data does not match Task[] type');
     }
     return data;
   } catch (error) {
-    console.error('Error fetching tasks:', error);
+    console.log('Error fetching tasks:', error);
     throw error;
   }
 }

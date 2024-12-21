@@ -23,8 +23,13 @@ services:
     depends_on:
       - db
     volumes:
-      - ./backend:/usr/src/app
+      - ./backend:/usr/src/app  # ローカルのコードをマウント
+      - /usr/src/app/__pycache__  # キャッシュディレクトリを無視
     environment:
+      - FLASK_APP=app.main
+      - FLASK_ENV=development
+      - ENV PYTHONUNBUFFERED=1
+      - FLASK_DEBUG=1
       - DATABASE_URL=postgresql://user:password@db:5432/taskdb
 
   db:

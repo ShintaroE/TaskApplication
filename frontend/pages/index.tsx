@@ -6,7 +6,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { useEffect } from 'react'
 import {getTasks} from '@/pages/api/getTasks'
+import {addTasks , AddTaskResponse} from '@/pages/api/addTasks'
+import {getNewId , NewSeqNumber} from '@/pages/api/getNewId'
 
+//Todoリストの型を定義
 interface Task {
   id: number
   text: string
@@ -14,37 +17,63 @@ interface Task {
 }
 
 export default function TaskManager() {
+  //useState表示するタスクを格納
   const [tasks, setTasks] = useState<Task[]>([])
+  //useState表示する新しくタスクを格納
   const [newTask, setNewTask] = useState('')
+  //useStateでダークモードとライトモードを切り替える
   const [darkMode, setDarkMode] = useState(false)
 
+  //useEffectで初回レンダリング時にDB上のタスクを取得
   useEffect(() => {
-    getTasks().then(data => {
-      setTasks(data)
-    })
+    getTasks().then((data) => {
+      setTasks(data);
+    });
   }, [])
 
+  //新しいタスクを追加する
   const addTask = () => {
+    //新しいタスクが空文字でない場合、新しいタスクを追加
     if (newTask.trim() !== '') {
-      setTasks([...tasks, { id: Date.now(), text: newTask, completed: false }])
-      setNewTask('')
+      //挿入データのオブジェクトを作成
+      //DBに新しいタスクを追加
+      addTasks(newTask).then((response: AddTaskResponse) => {
+        if (response.success) {
+          //追加が成功した場合、新しいタスクを追加
+          const newdata: Task = {
+            id: response.id,
+            text: newTask,
+            completed: false
+          }
+          setTasks([...tasks, newdata])
+          //新しいタスクを追加した後、newTaskを空文字にする
+          setNewTask('')
+        }
+      })
+    } else {
+      console.log('Failed to add new task ');
     }
   }
+  
 
+  //タスクの完了状態を切り替える
   const toggleTask = (id: number) => {
     setTasks(tasks.map(task => 
       task.id === id ? { ...task, completed: !task.completed } : task
     ))
   }
 
+  //タスクを削除
   const deleteTask = (id: number) => {
     setTasks(tasks.filter(task => task.id !== id))
   }
 
+  //ダークモードとライトモードを切り替える
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
   }
 
+  //エンターキーを押した時に新しいタスクを追加する
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       addTask();
