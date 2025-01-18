@@ -30,6 +30,8 @@ export default function TaskManager() {
   useEffect(() => {
     getTasks().then((data) => {
       setTasks(data);
+    }).catch((error) =>{
+      console.log('Error fetching tasks:', error);
     });
   }, [])
 

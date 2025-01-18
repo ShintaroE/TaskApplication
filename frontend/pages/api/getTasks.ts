@@ -20,9 +20,10 @@ export async function getTasks() :Promise<Task[]> {
     //REST APIを叩いてデータを取得
     const response = await axios.get('http://localhost:8000/api/gettasks');
     //取得したデータをdataに格納
-    const data:any = response.data;
+    const data:any = response.data['tasks'];
     //型チェック
     if (!isTaskArray(data)) {
+        console.log(data);
         throw new Error('Data does not match Task[] type');
     }
     return data;
