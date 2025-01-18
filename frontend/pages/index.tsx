@@ -8,6 +8,8 @@ import { useEffect } from 'react'
 import {getTasks} from '@/pages/api/getTasks'
 import {addTasks , AddTaskResponse} from '@/pages/api/addTasks'
 import {getNewId , NewSeqNumber} from '@/pages/api/getNewId'
+import { changeTaskCondition ,  ChangeTaskResponse} from './api/changeTaskCondition'
+import { deleteFromTask , DeleteTaskResponse } from './api/deleteTask'
 
 //Todoリストの型を定義
 interface Task {
@@ -57,15 +59,27 @@ export default function TaskManager() {
   
 
   //タスクの完了状態を切り替える
-  const toggleTask = (id: number) => {
-    setTasks(tasks.map(task => 
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ))
+  const toggleTask = (changeTask: Task) => {
+    changeTaskCondition(changeTask.completed , changeTask.id).then((response: ChangeTaskResponse) => {
+      if(response.success){
+        setTasks(tasks.map(task => 
+          task.id === changeTask.id ? { ...task, completed: !task.completed } : task
+        ))
+      }
+    }).catch((error) => {
+      console.log('Error changing task condition:', error);
+    });
   }
 
   //タスクを削除
   const deleteTask = (id: number) => {
-    setTasks(tasks.filter(task => task.id !== id))
+    deleteFromTask(id).then((response: DeleteTaskResponse) =>{
+      if(response.success){
+        setTasks(tasks.filter(task => task.id !== id))
+      }
+    }).catch((error) =>{
+      console.log('Error deleting task:', error);
+    })
   }
 
   //ダークモードとライトモードを切り替える
@@ -112,7 +126,7 @@ export default function TaskManager() {
                     <input
                       type="checkbox"
                       checked={task.completed}
-                      onChange={() => toggleTask(task.id)}
+                      onChange={() => toggleTask(task)}
                       className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                     />
                     <span className={`text-lg ${task.completed ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-800 dark:text-white'}`}>
